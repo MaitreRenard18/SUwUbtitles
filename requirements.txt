@@ -22,6 +22,8 @@ proglog==0.1.10
 python-dotenv==1.0.1
 regex==2024.11.6
 requests==2.32.3
+srt==3.5.3
+stable-ts==2.18.2
 sympy==1.13.1
 tiktoken==0.8.0
 torch==2.5.1+cu124
