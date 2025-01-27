@@ -7,7 +7,7 @@ import numpy as np
 import srt
 from PIL import Image, ImageDraw, ImageFont
 
-from subtitle_parser import parse_subtitle
+from subtitles import parse_subtitle
 
 FONT = "C:/Windows/Fonts/impact.ttf"
 FONT_SIZE = 32

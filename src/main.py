@@ -1,22 +1,5 @@
-import tempfile
-
-import stable_whisper
-from stable_whisper import result_to_srt_vtt
-
+from subtitles import generate_subtitles
 from video import add_subtitles
-
-
-def generate_subtitles(video_path: str) -> str:
-    print("Loading model...")
-    model = stable_whisper.load_model("medium")
-
-    print("Reading file...")
-    result = model.transcribe(video_path, fp16=False)
-    
-    srt_file = tempfile.TemporaryFile(suffix=".srt", delete=False)
-    result_to_srt_vtt(result, srt_file.name, word_level=True)
-    
-    return srt_file.name
 
 
 def generate_video(video_path: str) -> None:

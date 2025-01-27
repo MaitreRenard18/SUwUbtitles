@@ -1,5 +1,9 @@
 import re
+import tempfile
 from dataclasses import dataclass
+
+import stable_whisper
+from stable_whisper import result_to_srt_vtt
 
 PATTERN = r'(<font color="(#[a-fA-F0-9]+)">(.*?)</font>)'
 
@@ -8,6 +12,19 @@ PATTERN = r'(<font color="(#[a-fA-F0-9]+)">(.*?)</font>)'
 class Subtitle:
     content: str
     color: str
+
+
+def generate_subtitles(video_path: str) -> str:
+    print("Loading model...")
+    model = stable_whisper.load_model("medium")
+
+    print("Reading file...")
+    result = model.transcribe(video_path, fp16=False)
+    
+    srt_file = tempfile.TemporaryFile(suffix=".srt", delete=False)
+    result_to_srt_vtt(result, srt_file.name, word_level=True)
+    
+    return srt_file.name
 
 
 def parse_subtitle(text: str) -> list[Subtitle]:
@@ -34,6 +51,3 @@ def parse_subtitle(text: str) -> list[Subtitle]:
             parsed_data.append(Subtitle(plain_text, color="#ffffff"))   
 
     return parsed_data
-
-if __name__ == "__main__":
-    print(parse_subtitle('Here <font color="#00ff00">we</font> are again,'))
