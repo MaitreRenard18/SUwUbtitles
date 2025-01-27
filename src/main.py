@@ -1,22 +1,42 @@
+import os
+from tempfile import TemporaryFile, _TemporaryFileWrapper
+
+from fastapi import FastAPI, Request, UploadFile
+from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 from subtitles import generate_subtitles
 from video import add_subtitles
 
+app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-def generate_video(video_path: str) -> None:
-    srt_file_path = generate_subtitles(video_path)
-    add_subtitles(video_path, srt_file_path)
+templates = Jinja2Templates(directory="templates")
 
 
-if __name__ == "__main__":
-    import tkinter as tk
-    from time import time
-    from tkinter import filedialog
+@app.get("/")
+async def root(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="upload.html", context={}
+    )
 
-    root = tk.Tk()
-    root.withdraw()
 
-    file_path = filedialog.askopenfilename(initialdir="./in")
+async def streamer(file: _TemporaryFileWrapper):
+    file.seek(0)
+    while chunk := file.read(1024 * 1024):
+        yield chunk
 
-    t0 = time()
-    generate_video(file_path)
-    print(f"Generated in {time() - t0}")
+
+@app.post("/upload/")
+async def upload(video: UploadFile):
+    with TemporaryFile(mode="+bw", suffix=".mp4", delete=False) as base_video:
+        base_video.write(await video.read())
+        
+        subtitles = generate_subtitles(base_video.name)
+        
+        final_video = TemporaryFile("+bw", delete=False)
+        add_subtitles(base_video.name, subtitles, final_video.name)
+        os.remove(subtitles)
+        
+        return StreamingResponse(streamer(final_video))

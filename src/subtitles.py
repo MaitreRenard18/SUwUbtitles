@@ -14,7 +14,7 @@ class Subtitle:
     color: str
 
 
-def generate_subtitles(video_path: str) -> str:
+def generate_subtitles(video_path: str) -> tempfile._TemporaryFileWrapper:
     print("Loading model...")
     model = stable_whisper.load_model("medium")
 
@@ -24,7 +24,7 @@ def generate_subtitles(video_path: str) -> str:
     srt_file = tempfile.TemporaryFile(suffix=".srt", delete=False)
     result_to_srt_vtt(result, srt_file.name, word_level=True)
     
-    return srt_file.name
+    return srt_file
 
 
 def parse_subtitle(text: str) -> list[Subtitle]:

@@ -13,8 +13,6 @@ FONT = "C:/Windows/Fonts/impact.ttf"
 FONT_SIZE = 32
 TEXT_POSITION = (50, 50)
 
-OUTPUT_PATH = "out/result.mp4"
-
 
 def put_custom_text(frame, text, font_path, font_size):
     pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -40,7 +38,7 @@ def put_custom_text(frame, text, font_path, font_size):
     return cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
 
-def add_subtitles(input_video: str, srt_file: str):
+def add_subtitles(input_video: str, srt_file: str, output_video: str) -> None:
     cap = cv2.VideoCapture(input_video)
     
     fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -77,13 +75,14 @@ def add_subtitles(input_video: str, srt_file: str):
     cap.release()
     out.release()
 
-    add_audio(input_video, no_audio_video.name, OUTPUT_PATH)
+    with open(output_video, mode="w+") as final_video:
+        add_audio(input_video, no_audio_video.name, final_video.name)
     
     no_audio_video.close()
     os.remove(no_audio_video.name)
 
 
-def add_audio(input_video: str, input_video_no_audio: str, output_video: str):
+def add_audio(input_video: str, input_video_no_audio: str, output_video: str) -> None:
     command = [
         "ffmpeg",
         "-y",
@@ -95,6 +94,7 @@ def add_audio(input_video: str, input_video_no_audio: str, output_video: str):
         "-map", "1:a:0", 
         output_video
     ]
+    
     subprocess.run(command)
     print("Vidéo finale avec sous-titres et audio créée :", output_video)
     
