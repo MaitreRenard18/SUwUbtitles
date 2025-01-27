@@ -1,0 +1,74 @@
+:root {
+  --background-color: #23272e;
+  --secondary-background-color: #48515f;
+  --primary-color: #e37933;
+  --secondary-color: #339DE3;
+  --text-color: white;
+}
+
+* {
+  font-family: "Ubuntu Mono", serif;
+}
+
+body {
+  background-color: var(--background-color);
+  margin-left: 30%;
+  margin-right: 30%;
+}
+
+.form-wrapper {
+  position: relative;
+  
+}
+
+.form-wrapper > label {
+  position: absolute;
+  top: -.5em;
+  z-index: 1;
+  left: 2em;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  padding: 0 5px;
+}
+
+.form-wrapper > form {
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  position: relative;
+  margin: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-wrapper > form input[type=submit] {
+  background-color: var(--secondary-color);
+  border: none;
+  color: var(--text-color);
+  padding: 10px;
+  border-radius: 7px;
+  transition: 0.3s;
+}
+
+.form-wrapper > form input[type=submit]:hover {
+  filter: brightness(120%);
+}
+
+.form-wrapper > form input[type=file] {
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+
+.form-wrapper > form input[type=file]::file-selector-button {
+  background-color: transparent;
+  border: 2px solid var(--secondary-background-color);
+  color: var(--text-color);
+  padding: 10px;
+  border-radius: 7px;
+  transition: 0.3s;
+}
+
+.form-wrapper > form input[type=file]::file-selector-button:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
