@@ -8,7 +8,7 @@ from video import add_subtitles
 
 def generate_subtitles(video_path: str) -> str:
     print("Loading model...")
-    model = stable_whisper.load_model("medium").to("cuda")
+    model = stable_whisper.load_model("medium")
 
     print("Reading file...")
     result = model.transcribe(video_path, fp16=False)
