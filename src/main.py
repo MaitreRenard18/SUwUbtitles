@@ -24,12 +24,11 @@ async def root(request: Request):
 
 @app.post("/upload/")
 async def upload(video: UploadFile):
-    with TemporaryFile(mode="+bw", suffix=".mp4", delete=False) as base_video:
-        base_video.write(await video.read())
-        
-        subtitles = SubtitleGenerator.generate_str(base_video.name)
-        
-        final_video = TemporaryFile("+bw", delete=False, suffix=".mp4")
-        add_subtitles(base_video.name, subtitles, final_video.name)
-        
-        return FileResponse(final_video.name, media_type='application/octet-stream',filename=video.filename)
+    content = await video.read()
+    
+    subtitles = SubtitleGenerator.generate_str(content)
+    
+    final_video = TemporaryFile("+bw", delete=False, suffix=".mp4")
+    add_subtitles(content, subtitles, final_video.name)
+    
+    return FileResponse(final_video.name, media_type='application/octet-stream',filename=video.filename)

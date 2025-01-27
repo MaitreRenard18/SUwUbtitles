@@ -1,6 +1,8 @@
+import os
 import re
 from dataclasses import dataclass
 from datetime import timedelta
+from tempfile import TemporaryFile
 from typing import Generator
 
 import srt
@@ -27,8 +29,16 @@ class SubtitleGenerator():
     model = stable_whisper.load_model("medium")
 
     @staticmethod
-    def generate_str(video_path: str) -> str:
-        result = SubtitleGenerator.model.transcribe(video_path, fp16=False)
+    def generate_str(video: str | bytes) -> str:
+        if isinstance(video, str):
+            result = SubtitleGenerator.model.transcribe(video, fp16=False)
+        
+        else:
+            with TemporaryFile(mode="bw+", suffix=".mp4", delete=False) as temp:
+                temp.write(video)
+                result = SubtitleGenerator.model.transcribe(temp.name, fp16=False)
+        
+            os.remove(temp.name)
         
         return result_to_srt_vtt(result, word_level=True)
 

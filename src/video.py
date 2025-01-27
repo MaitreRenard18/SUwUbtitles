@@ -1,6 +1,7 @@
 import os
 import subprocess
 import tempfile
+from tempfile import TemporaryFile, _TemporaryFileWrapper
 
 import cv2
 import numpy as np
@@ -35,8 +36,16 @@ def put_custom_text(frame: cv2.typing.MatLike, subtitle: RichSubtitle, font_path
     return cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
 
-def add_subtitles(input_video: str, subtitles: str | list[RichSubtitle], output_video: str) -> None:
-    cap = cv2.VideoCapture(input_video)
+def add_subtitles(video: str | bytes , subtitles: str | list[RichSubtitle], output_video: str) -> None:
+    is_temporary_file = False
+    if isinstance(video, bytes):
+        is_temporary_file = True
+        
+        with TemporaryFile(mode="bw+", suffix=".mp4", delete=False) as temp:
+            temp.write(video)
+            video = temp.name
+    
+    cap = cv2.VideoCapture(video)
     
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -73,10 +82,14 @@ def add_subtitles(input_video: str, subtitles: str | list[RichSubtitle], output_
     out.release()
 
     with open(output_video, mode="w+") as final_video:
-        add_audio(input_video, no_audio_video.name, final_video.name)
+        add_audio(video, no_audio_video.name, final_video.name)
     
     no_audio_video.close()
+    
+    # Clear temp files
     os.remove(no_audio_video.name)
+    if is_temporary_file:
+        os.remove(video)
 
 
 def add_audio(input_video: str, input_video_no_audio: str, output_video: str) -> None:
