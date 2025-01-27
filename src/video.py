@@ -22,13 +22,15 @@ def put_custom_text(frame, text, font_path, font_size):
     draw = ImageDraw.Draw(pil_image)
     W, H = pil_image.size
     
+    parsed_text = parse_subtitle(text)
+    full_text = ''.join(map(lambda x: x.content, parsed_text))
     font = ImageFont.truetype(font_path, font_size)
 
-    _, _, w, h = draw.textbbox((0, 0), text, font=font)
+    _, _, w, h = draw.textbbox((0, 0), full_text, font=font)
     centered_position = ((W-w)/2, (H-h)/2)
     x_offset = 0
     
-    for part in parse_subtitle(text):
+    for part in parsed_text:
         position = (centered_position[0] + x_offset, centered_position[1]) 
         draw.text(position, part.content, font=font, fill=part.color)
         
