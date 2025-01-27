@@ -29,7 +29,7 @@ class SubtitleGenerator():
     model = stable_whisper.load_model("medium")
 
     @staticmethod
-    def generate_str(video: str | bytes) -> str:
+    def generate_str(video: str | bytes, word_level=True) -> str:
         if isinstance(video, str):
             result = SubtitleGenerator.model.transcribe(video, fp16=False)
         
@@ -40,7 +40,7 @@ class SubtitleGenerator():
         
             os.remove(temp.name)
         
-        return result_to_srt_vtt(result, word_level=True)
+        return result_to_srt_vtt(result, word_level=word_level)
 
     @staticmethod
     def parse(text: str) -> Generator[RichSubtitle, None, None]:

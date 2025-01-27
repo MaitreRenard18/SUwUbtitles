@@ -1,7 +1,7 @@
 import os
 from tempfile import TemporaryFile, _TemporaryFileWrapper
 
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -23,10 +23,10 @@ async def root(request: Request):
     )
 
 @app.post("/upload/")
-async def upload(video: UploadFile):
+async def upload(video: UploadFile, word_level: bool = Form(True)):
     content = await video.read()
     
-    subtitles = SubtitleGenerator.generate_str(content)
+    subtitles = SubtitleGenerator.generate_str(content, word_level)
     
     final_video = TemporaryFile("+bw", delete=False, suffix=".mp4")
     add_subtitles(content, subtitles, final_video.name)

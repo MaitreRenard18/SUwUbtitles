@@ -12,6 +12,10 @@
         <label>Generate subtitles</label>
         <form action="/upload/" method="post" enctype="multipart/form-data">
             <input type="file" name="video" accept="video/mp4"/ required>
+            <div class="checkbox-wrapper">
+                <input id="word_level" type="checkbox" name="word_level">
+                <label for="word_level">Highlight words</label>
+            </div>
             <input type="submit" value="Upload"/>
         </form>
     </div>
