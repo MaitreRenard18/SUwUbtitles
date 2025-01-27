@@ -1,7 +1,9 @@
 import re
-import tempfile
 from dataclasses import dataclass
+from datetime import timedelta
+from typing import Generator
 
+import srt
 import stable_whisper
 from stable_whisper import result_to_srt_vtt
 
@@ -9,45 +11,51 @@ PATTERN = r'(<font color="(#[a-fA-F0-9]+)">(.*?)</font>)'
 
 
 @dataclass
-class Subtitle:
+class SubtitleChunk:
     content: str
     color: str
 
 
-def generate_subtitles(video_path: str) -> tempfile._TemporaryFileWrapper:
-    print("Loading model...")
+class RichSubtitle(srt.Subtitle):
+    def __init__(self, index: int, start: timedelta, end: timedelta, chunks: list[SubtitleChunk], proprietary: str = ""):
+        super().__init__(index, start, end, ''.join(map(lambda x: x.content, chunks)), proprietary)    
+        self.chunks = chunks
+
+
+class SubtitleGenerator():
+    print("Loading model")
     model = stable_whisper.load_model("medium")
 
-    print("Reading file...")
-    result = model.transcribe(video_path, fp16=False)
-    
-    srt_file = tempfile.TemporaryFile(suffix=".srt", delete=False)
-    result_to_srt_vtt(result, srt_file.name, word_level=True)
-    
-    return srt_file
+    @staticmethod
+    def generate_str(video_path: str) -> str:
+        result = SubtitleGenerator.model.transcribe(video_path, fp16=False)
+        
+        return result_to_srt_vtt(result, word_level=True)
 
+    @staticmethod
+    def parse(text: str) -> Generator[RichSubtitle, None, None]:
+        for i, subtitle in enumerate(srt.parse(text)):
+            chunks = []
+            
+            last_index = 0
+            for match in re.finditer(PATTERN, subtitle.content):
+                start, end = match.span()
 
-def parse_subtitle(text: str) -> list[Subtitle]:
-    parsed_data = []
+                if start > last_index:
+                    plain_text = subtitle.content[last_index:start]
+                    if plain_text:
+                        chunks.append(SubtitleChunk(plain_text, "#ffffff"))
 
-    last_index = 0
-    for match in re.finditer(PATTERN, text):
-        start, end = match.span()
+                color = match.group(2)
+                content = match.group(3)
+                chunks.append(SubtitleChunk(content, color))
 
-        if start > last_index:
-            plain_text = text[last_index:start]
-            if plain_text:
-                parsed_data.append(Subtitle(plain_text, "#ffffff"))
+                last_index = end
 
-        color = match.group(2)
-        content = match.group(3)
-        parsed_data.append(Subtitle(content, color))
+            if last_index < len(subtitle.content):
+                plain_text = subtitle.content[last_index:]
+                if plain_text:
+                    chunks.append(SubtitleChunk(plain_text, color="#ffffff"))
+            
+            yield RichSubtitle(i, subtitle.start, subtitle.end, chunks, subtitle.proprietary) 
 
-        last_index = end
-
-    if last_index < len(text):
-        plain_text = text[last_index:]
-        if plain_text:
-            parsed_data.append(Subtitle(plain_text, color="#ffffff"))   
-
-    return parsed_data
