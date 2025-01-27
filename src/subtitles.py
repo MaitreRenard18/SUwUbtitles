@@ -68,4 +68,3 @@ class SubtitleGenerator():
                     chunks.append(SubtitleChunk(plain_text, color="#ffffff"))
             
             yield RichSubtitle(i, subtitle.start, subtitle.end, chunks, subtitle.proprietary) 
-
