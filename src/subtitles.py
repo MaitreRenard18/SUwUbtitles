@@ -25,18 +25,25 @@ class RichSubtitle(srt.Subtitle):
 
 
 class SubtitleGenerator():
-    print("Loading model")
-    model = stable_whisper.load_model("medium")
+    _model = None
 
+    @staticmethod
+    def get_model():
+        if SubtitleGenerator._model is None:
+            print("Loading model")
+            SubtitleGenerator._model = stable_whisper.load_model("medium")
+            
+        return SubtitleGenerator._model
+    
     @staticmethod
     def generate_str(video: str | bytes, word_level=True) -> str:
         if isinstance(video, str):
-            result = SubtitleGenerator.model.transcribe(video, fp16=False)
+            result = SubtitleGenerator.get_model().transcribe(video, fp16=False)
         
         else:
             with TemporaryFile(mode="bw+", suffix=".mp4", delete=False) as temp:
                 temp.write(video)
-                result = SubtitleGenerator.model.transcribe(temp.name, fp16=False)
+                result = SubtitleGenerator.get_model().transcribe(temp.name, fp16=False)
         
             os.remove(temp.name)
         
