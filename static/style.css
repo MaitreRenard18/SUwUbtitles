@@ -48,6 +48,7 @@ input[type=submit] {
   padding: 10px;
   border-radius: 7px;
   transition: 0.3s;
+  margin-bottom: 0px;
 }
 
 input[type=submit]:hover {
@@ -56,15 +57,13 @@ input[type=submit]:hover {
 
 input[type=file] {
   color: var(--text-color);
-}
-
-.form-wrapper > form * {
   margin-bottom: 10px;
 }
 
 .form-wrapper .checkbox-wrapper {
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 input[type=checkbox] {
